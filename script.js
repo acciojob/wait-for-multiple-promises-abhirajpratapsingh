@@ -1,43 +1,42 @@
-// Function to create a promise that resolves after a random time between 1 and 3 seconds
-function createPromise(promiseNumber) {
-    return new Promise((resolve) => {
-        const time = Math.random() * 2 + 1; // Random time between 1 and 3 seconds
-        setTimeout(() => {
-            resolve({ promiseNumber, time });
-        }, time * 1000); // Convert to milliseconds
-    });
+function randomDelay() {
+    return Math.random() * 2 + 1; 
 }
-
-// Create three promises
-const promises = [
-    createPromise(1),
-    createPromise(2),
-    createPromise(3),
-];
-
-// Get reference to the results body
-const resultsBody = document.getElementById("results-body");
-
-// Show loading message
-resultsBody.innerHTML = '<tr><td colspan="2">Loading...</td></tr>';
-
-// Use Promise.all to wait for all promises to resolve
-Promise.all(promises).then((results) => {
-    // Clear the loading message
-    resultsBody.innerHTML = '';
-
-    // Calculate total time
-    const totalTime = results.reduce((acc, result) => acc + result.time, 0);
-
-    // Populate the table with results
-    results.forEach(result => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>Promise ${result.promiseNumber}</td><td>${result.time.toFixed(3)}</td>`;
-        resultsBody.appendChild(row);
-    });
-
-    // Add total row
-    const totalRow = document.createElement('tr');
-    totalRow.innerHTML = `<td>Total</td><td>${totalTime.toFixed(3)}</td>`;
-    resultsBody.appendChild(totalRow);
+const promise1 = new Promise(resolve => {
+    const delay = randomDelay();
+    setTimeout(() => resolve(delay), delay * 1000);
 });
+const promise2 = new Promise(resolve => {
+    const delay = randomDelay();
+    setTimeout(() => resolve(delay), delay * 1000);
+});
+const promise3 = new Promise(resolve => {
+    const delay = randomDelay();
+    setTimeout(() => resolve(delay), delay * 1000);
+});
+Promise.all([promise1, promise2, promise3])
+    .then(results => {
+        const totalTime = results.reduce((sum, time) => sum + time, 0).toFixed(3);
+        document.getElementById('loading-row').remove();
+        const tableBody = document.querySelector('#promise-table tbody');
+        results.forEach((result, index) => {
+            const row = document.createElement('tr');
+            const promiseCell = document.createElement('td');
+            const timeCell = document.createElement('td');
+            promiseCell.textContent = `Promise ${index + 1}`;
+            timeCell.textContent = result.toFixed(3);
+            row.appendChild(promiseCell);
+            row.appendChild(timeCell);
+            tableBody.appendChild(row);
+        });
+        const totalRow = document.createElement('tr');
+        const totalLabelCell = document.createElement('td');
+        const totalTimeCell = document.createElement('td');
+        totalLabelCell.textContent = 'Total';
+        totalTimeCell.textContent = totalTime;
+        totalRow.appendChild(totalLabelCell);
+        totalRow.appendChild(totalTimeCell);
+        tableBody.appendChild(totalRow);
+    })
+    .catch(error => {
+        console.error('Error with one of the promises:', error);
+    });
